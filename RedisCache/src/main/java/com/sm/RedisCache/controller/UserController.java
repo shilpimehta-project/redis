@@ -1,14 +1,17 @@
 package com.sm.RedisCache.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,4 +50,18 @@ public class UserController {
 		userService.deleteUser(id);
 		return ResponseEntity.noContent().build();
 	}
+	
+	// Update an existing user
+    @PutMapping("/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody @Validated User user) {
+        Optional<User> existingUser = Optional.of(userService.getUserById(id));
+        if (existingUser.isPresent()) {
+            user.setId(id);  // Set the ID of the user to ensure it updates the correct one.
+            User updatedUser = userService.saveUser(user);
+          //  logger.info("User with ID: {} updated successfully.", id);
+            return ResponseEntity.ok(updatedUser);
+        }
+    //    logger.warn("User with ID: {} not found for update.", id);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
 }
