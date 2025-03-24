@@ -24,18 +24,16 @@ public class UserService {
 
 	  private Logger log = LoggerFactory.getLogger(UserService.class);
 	  
-	 
+	  
+	    public User saveUser(User user) {
+	    	System.out.println("DB save method is Getting called");
+	        return userRepository.save(user);
+	    }
 	  
 	    @Cacheable(value = "users", key = "#id")
 	    public User getUserById(Long id) {
 	    	System.out.println("DB is Getting called id="+id);
 	        return userRepository.findById(id).orElse(null);
-	    }
-
-	    @CachePut(value = "users", key = "#user.id")
-	    public User saveUser(User user) {
-	    	System.out.println("DB save method is Getting called");
-	        return userRepository.save(user);
 	    }
 
 	    @CacheEvict(value = "users", key = "#id")
@@ -48,4 +46,25 @@ public class UserService {
 	    	return userRepository.findAll();
 	    }
 
+	    
+	    @CachePut(value = "users", key = "#user.id")
+	    public User updateUser(Long id, User user) {
+	        System.out.println("DB update method is Getting called");
+
+	        // Check if the user exists in the database
+	        User existingUser = userRepository.findById(id).orElse(null);
+
+	        if (existingUser != null) {
+	            // Update fields of the existing user with the new user data
+	            existingUser.setName(user.getName());
+	            existingUser.setEmail(user.getEmail());
+	            // Update other fields as necessary
+
+	            // Save the updated user back to the database
+	            return userRepository.save(existingUser);
+	        } else {
+	            // If the user doesn't exist, you can either throw an exception or return null
+	            return null;
+	        }
+	    }
 }
